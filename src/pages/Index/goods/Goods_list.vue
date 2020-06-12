@@ -49,7 +49,7 @@
         <el-table-column label="商品描述" prop="goodsDesc" width="250"></el-table-column>
         <el-table-column label="操作" width="180">
           <template slot-scope="scope">
-            <el-button @click="clickEdit(scope.row)">编辑</el-button>
+            <el-button @click="clickEdit(scope.$index)">编辑</el-button>
             <el-button type="danger" @click="clickDel(scope.row.id)">删除</el-button>
           </template>
         </el-table-column>
@@ -101,7 +101,7 @@
         </div>
         <!-- -------------------------------- -->
         <span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button @click="clickCancel">取 消</el-button>
           <el-button type="primary" @click="clickEd">确 定</el-button>
         </span>
       </el-dialog>
@@ -134,6 +134,7 @@ export default {
       pagesize: 4, //每页显示的条数
       listsize: [4, 8, 12],
       tableData: [],
+      tableData1: [],
       // ratings: [] //评价
       dialogVisible: false
     };
@@ -215,11 +216,23 @@ export default {
     //编辑
     clickEdit(val) {
       this.dialogVisible = true;
-      //获取原来数据
-      this.oldgoodsList = val;
+
+      // console.log(this.tableData);
+      API_goods_list(this.currentPage, this.pagesize).then(res => {
+        res.data.data.forEach(v => {
+          v.ctime = this.resolvingDate(v.ctime);
+          v.imgUrl = `http://127.0.0.1:5000/upload/imgs/goods_img/${v.imgUrl}`;
+        });
+        this.tableData1 = res.data.data;
+        this.total = res.data.total;
+        this.oldgoodsList = this.tableData1[val];
+        // console.log(this.total);
+      });
     },
     //模态框编辑
     clickEd() {
+      //获取原来数据
+
       // name	String	是	商品名称
       // category	String	是	商品分类
       // price	String	是	商品价格
@@ -241,7 +254,7 @@ export default {
         // console.log(res);
         if (res.data.code == 0) {
           this.$message({
-            message: "商品添加成功",
+            message: "商品编辑成功",
             type: "success"
           });
           this.send(this.pagesize);
@@ -273,6 +286,11 @@ export default {
             message: "已取消删除"
           });
         });
+    },
+    //取消
+    clickCancel() {
+      this.dialogVisible = false;
+      this.send(this.pagesize);
     }
   },
   created() {

@@ -79,7 +79,7 @@ export default {
     },
     //验证旧密码是否正确
     checkoldpwd(val) {
-      API_old_pwd(val, sessionStorage.getItem("id")).then(res => {
+      API_old_pwd(val, localStorage.getItem("id")).then(res => {
         // console.log(res.data);
         if (res.data.code == "00") {
           this.err = false;
@@ -97,8 +97,9 @@ export default {
       // console.log(sessionStorage.getItem("id"));
       if (this.issend == false) return;
       this.issend = false;
+
       if (this.send) {
-        API_new_pwd(this.ruleForm.pass, sessionStorage.getItem("id")).then(
+        API_new_pwd(this.ruleForm.pass, Number(localStorage.getItem("id"))).then(
           res => {
             // console.log(res);
             if (res.data.code == 0) {

@@ -15,37 +15,31 @@
       </el-form>
       <div class="shops_img">
         <div>店铺头像</div>
+
         <div>
-          <img :src="form.avatar" />
           <el-upload
             class="avatar-uploader"
-            action="http://127.0.0.1:5000/shop/upload"
+            :action="server_upload"
             :show-file-list="false"
             :on-success="handleAvatarSuccess1"
           >
-            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+            <img v-if="headImg" :src="server_headImg+headImg" class="avatar" />
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
+          <!-- <img :src="headImg" /> -->
         </div>
       </div>
       <div class="shops_upload">
         <div>店铺图片</div>
-        <img
-          v-for="(item,index)  in form.pics"
-          :key="index"
-          :src="`http://127.0.0.1:5000/upload/shop/${item}`"
-        />
         <el-upload
-          action="http://127.0.0.1:5000/shop/upload"
+          :action="server_upload"
           list-type="picture-card"
-          :on-preview="handlePictureCardPreview"
+          :file-list="filelist"
           :on-success="handleAvatarSuccess"
+          :on-remove="removeimg"
         >
           <i class="el-icon-plus"></i>
         </el-upload>
-        <el-dialog :visible.sync="dialogVisible">
-          <img width="100%" :src="dialogImageUrl" alt />
-        </el-dialog>
       </div>
       <el-form ref="form" :model="form" label-width="80px">
         <el-form-item label="配送费">
@@ -66,11 +60,7 @@
 
         <el-form-item label="优惠活动">
           <el-checkbox-group v-model="value">
-            <el-checkbox label="在线支付满28减5"></el-checkbox>
-            <el-checkbox label="VC无限橙果汁全场8折"></el-checkbox>
-            <el-checkbox label="单人精彩套餐"></el-checkbox>
-            <el-checkbox label="特价饮品8折抢购"></el-checkbox>
-            <el-checkbox label="单人特色套餐"></el-checkbox>
+            <el-checkbox v-for="item in supports" :key="item" :label="item"></el-checkbox>
           </el-checkbox-group>
         </el-form-item>
 
@@ -91,77 +81,75 @@
 
 <script>
 import moment from "moment";
-import { API_shop_info, API_shop_edit } from "@/api/apis";
+import {
+  API_shop_info,
+  API_shop_edit,
+  server_upload,
+  server_headImg
+} from "@/api/apis"; //
 export default {
   data() {
     return {
       form: {},
-      dialogImageUrl: "",
-      dialogVisible: false,
       value: [],
       imageUrl: "",
-      pics: [], //店铺图片
-      headImg: [], //店铺头像 2020-06-10 09:15:00
-      value1: [new Date(2020, 2, 3, 18, 56, 3), new Date(2020, 6, 10, 9, 15)]
+      headImg: "", //店铺头像
+      filelist: [],
+      removelist: [],
+      supports: [
+        "在线支付满28减5",
+        "VC无限橙果汁全场8折",
+        "单人精彩套餐",
+        "特价饮品8折抢购",
+        "单人特色套餐"
+      ],
+      value1: [new Date(2020, 2, 3, 18, 56, 3), new Date(2020, 6, 10, 9, 15)],
+      server_upload: server_upload, //图片上传api
+      server_headImg: server_headImg
     };
   },
   methods: {
-    handleAvatarSuccess1(res, file) {
-      this.imageUrl = URL.createObjectURL(file.raw);
-      console.log(res.code);
-
-      if (res.code == 0) {
-        this.$message({
-          message: "头像上传成功",
-          type: "success"
-        });
-        this.headImg = res.imgUrl;
-      }
-    },
-
-    handlePictureCardPreview(file) {
-      this.dialogImageUrl = file.url;
-      this.dialogVisible = true;
-    },
-    // 图片上传
+    // 店铺图片上传
     handleAvatarSuccess(res) {
-      // console.log(res.imgUrl);
-      this.pics.push(res.imgUrl);
+      let list = [];
+      list = this.filelist.map(v => v.url);
+      //添加
+      this.removelist = list.map(v => v.split("/")[v.split("/").length - 1]);
+      this.removelist.push(res.imgUrl);
+    },
+    //删除图片
+    removeimg(file, fileList) {
+      let list = [];
+      list = fileList.map(v => v.url);
+      //删除
+      this.removelist = list.map(v => v.split("/")[v.split("/").length - 1]);
+    },
+
+    // 店铺头像图片上传
+    handleAvatarSuccess1(res) {
+      this.headImg = res.imgUrl;
     },
     //保存
-    // id, name, bulletin, avatar, deliveryPrice, deliveryTime, description, score, sellCount, supports, date, pics
+
     clickKeep() {
       this.value1 = this.value1.map(
         v => (v = moment(v).format("YYYY-MM-DD hh:mm:ss"))
       );
+      // console.log(this.form);
+      let shopData = {};
+      shopData = { ...this.form }; //深拷贝
 
-      API_shop_edit(
-        this.form.id,
-        this.form.name,
-        this.form.bulletin,
-        this.headImg,
-        this.form.deliveryPrice,
-        this.form.deliveryTime,
-        this.form.description,
-        this.form.score,
-        this.form.sellCount,
-        JSON.stringify(this.value),
-        JSON.stringify(this.value1),
-        JSON.stringify(this.pics)
-      ).then(res => {
+      shopData.avatar = this.headImg;
+      shopData.supports = JSON.stringify(this.value);
+      shopData.date = JSON.stringify(this.value1);
+      shopData.pics = JSON.stringify(this.removelist);
+      // console.log(this.removelist);
+
+      API_shop_edit(shopData).then(res => {
         if (res.data.code == 0) {
           this.$message({
             message: "店铺修改成功",
             type: "success"
-          });
-          API_shop_info().then(res => {
-            //给头像添加端口
-            res.data.data.avatar =
-              "http://127.0.0.1:5000/upload/shop/" + res.data.data.avatar;
-            this.form = res.data.data;
-            // console.log(this.form.id);
-
-            this.value = this.form.supports;
           });
         }
       });
@@ -169,12 +157,16 @@ export default {
   },
   created() {
     API_shop_info().then(res => {
-      //给头像添加端口
-      res.data.data.avatar =
-        "http://127.0.0.1:5000/upload/shop/" + res.data.data.avatar;
-      this.form = res.data.data;
-      // console.log(this.form.id);
+      //获取头像
+      this.headImg = res.data.data.avatar;
+      // console.log(res.data.data.pics);
+      //获取图片列表
+      this.removelist = res.data.data.pics;
+      this.filelist = res.data.data.pics.map(
+        v => (v = { url: server_headImg + v })
+      );
 
+      this.form = res.data.data;
       this.value = this.form.supports;
     });
     // console.log(this.value1);
@@ -198,9 +190,7 @@ export default {
   }
   .shops_content {
     padding: 20px;
-    .avatar-uploader {
-      border: 1px solid #d9d9d9;
-    }
+
     .el-input {
       width: 400px;
     }
@@ -220,32 +210,12 @@ export default {
         height: 148px;
         padding-left: 14px;
       }
-      .avatar-uploader .el-upload {
-        border: 1px dashed #d9d9d9;
-        border-radius: 6px;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-      }
-      .avatar-uploader .el-upload:hover {
-        border-color: #409eff;
-      }
-      .avatar-uploader-icon {
-        font-size: 28px;
-        color: #8c939d;
-        width: 178px;
-        height: 178px;
-        line-height: 178px;
-        text-align: center;
-      }
-      .avatar {
-        width: 178px;
-        height: 178px;
-        display: block;
-      }
     }
     .shops_upload {
-      padding-left: 10px;
+      > div:nth-child(2) {
+        margin-left: 24px;
+      }
+
       display: flex;
       font-size: 14px;
       color: #606266;
@@ -259,6 +229,29 @@ export default {
         margin-left: 15px;
       }
     }
+  }
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409eff;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 148px;
+    height: 148px;
+    line-height: 148px;
+    text-align: center;
+  }
+  .avatar {
+    width: 148px;
+    height: 148px;
+    display: block;
   }
 }
 </style>

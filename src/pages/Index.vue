@@ -47,7 +47,8 @@
           <el-row type="flex" class="row-bg">
             <el-col :span="24">
               <el-breadcrumb separator-class="el-icon-arrow-right">
-                <el-breadcrumb-item v-for="item in this.$route.meta" :key="item">{{item}}</el-breadcrumb-item>
+                <!-- 面包屑 -->
+                <el-breadcrumb-item v-for="item in this.$route.meta.title" :key="item">{{item}}</el-breadcrumb-item>
               </el-breadcrumb>
             </el-col>
             <el-col :span="8" style="line-height:60px">
@@ -193,6 +194,7 @@ export default {
         this.show = false;
       }
     });
+    // console.log(this.treeList);
   },
   methods: {
     // 注销

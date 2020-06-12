@@ -36,11 +36,11 @@
     <!-- table表格 -->
     <el-table :data="tableData" border style="width: 100%">
       <el-table-column prop="orderNo" label="订单号" width="70"></el-table-column>
-      <el-table-column prop="orderTime" label="下单时间" width="170"></el-table-column>
+      <el-table-column prop="deliveryTime" label="下单时间" width="170"></el-table-column>
       <el-table-column prop="phone" label="手机号" width="120"></el-table-column>
       <el-table-column prop="consignee" label="收货人" width="70"></el-table-column>
       <el-table-column prop="deliverAddress" label="配送地址" width="90"></el-table-column>
-      <el-table-column prop="deliveryTime" label="送达时间" width="170"></el-table-column>
+      <el-table-column prop="orderTime" label="送达时间" width="170"></el-table-column>
       <el-table-column prop="remarks" label="用户备注" width="100"></el-table-column>
       <el-table-column prop="orderAmount" label="订单金额" width="100"></el-table-column>
       <el-table-column prop="orderState" label="订单状态" width="100"></el-table-column>
@@ -293,8 +293,8 @@ export default {
         // console.log(res);
         this.total = res.data.total;
         res.data.data.forEach(v => {
-          v.orderTime = moment(v).format("YYYY-MM-DD hh:mm:ss");
-          v.deliveryTime = moment(v).format("YYYY-MM-DD hh:mm:ss");
+          v.orderTime = moment(v.orderTime).format("YYYY-MM-DD hh:mm:ss");
+          v.deliveryTime = moment(v.deliveryTime).format("YYYY-MM-DD hh:mm:ss");
         });
         this.tableData = res.data.data;
       });
@@ -353,19 +353,10 @@ export default {
       // remarks	   	    备注
       // orderAmount	   	订单金额
       // orderState	   	订单状态
-      API_order_edit(
-        this.orderDetails.id,
-        this.orderDetails.orderNo,
-        this.orderDetails.orderTime,
-        this.orderDetails.phone,
-        this.orderDetails.consignee,
-        this.orderDetails.deliverAddress,
-        this.orderDetails.deliveryTime,
-        this.orderDetails.remarks,
-        this.orderDetails.orderAmount,
-        this.orderDetails.orderState
-      ).then(res => {
-        console.log(res.data.code);
+      // console.log(this.orderDetails);
+
+      API_order_edit(this.orderDetails).then(res => {
+        // console.log(res.data.code);
         if (res.data.code == 0) {
           this.$message({
             message: "修改成功",

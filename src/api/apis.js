@@ -1,6 +1,16 @@
 import axios from 'axios'
+//服务器ip地址
+const sever_ip = "http://127.0.0.1:5000"
+//服务器上传图片api地址
+export const server_upload = sever_ip + "/shop/upload"
+//服务器店铺头像地址
+export const server_headImg = sever_ip + "/upload/shop/"
+
+
+
+
 //设置服务器ip
-axios.defaults.baseURL = 'http://127.0.0.1:5000'
+axios.defaults.baseURL = sever_ip
 
 //1.登录/users/checkLogin post
 //account用户名
@@ -128,7 +138,7 @@ export const API_order_detail = (id) => axios.get('/order/detail', { params: { i
 // remarks	   	    备注
 // orderAmount	   	订单金额
 // orderState	   	订单状态
-export const API_order_edit = (id, orderNo, orderTime, phone, consignee, deliverAddress, deliveryTime, remarks, orderAmount, orderState) => axios.post('/order/edit', { id, orderNo, orderTime, phone, consignee, deliverAddress, deliveryTime, remarks, orderAmount, orderState })
+export const API_order_edit = (params) => axios.post('/order/edit', params)
 
 //26.获取店铺详情     /shop/info    GET
 export const API_shop_info = () => axios.get('/shop/info', { params: {} })
@@ -146,7 +156,7 @@ export const API_shop_info = () => axios.get('/shop/info', { params: {} })
 // supports	string数组	是	活动支持
 // date	string数组	是	营业时间
 // pics	string数组	是	图片
-export const API_shop_edit = (id, name, bulletin, avatar, deliveryPrice, deliveryTime, description, score, sellCount, supports, date, pics) => axios.post('/shop/edit', { id, name, bulletin, avatar, deliveryPrice, deliveryTime, description, score, sellCount, supports, date, pics })
+export const API_shop_edit = (params) => axios.post('/shop/edit', params)
 
 
 //29.首页报表接口  /order/totaldata GET

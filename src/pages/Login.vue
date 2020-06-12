@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <div class="login_box">
-      <div class="login_title">养猪系统登录</div>
+      <div class="login_title">长安外卖管理系统登录</div>
       <el-form
         :model="ruleForm"
         :rules="rules"
@@ -62,7 +62,7 @@ export default {
           // localStorage.setItem("token", res.data.token);
           localStorage.token = res.data.token;
           //把用户权限保存在本地
-          localStorage.role=res.data.role
+          localStorage.role = res.data.role;
           //提示信息
           this.$message({
             message: "登录成功！！！",
@@ -89,7 +89,9 @@ export default {
 .login {
   width: 100%;
   height: 100%;
-  background-color: #2d3a4b;
+  // background-color: #2d3a4b;
+  background: url(../assets/imgs/login.jpg) no-repeat;
+  background-size: 100% 100%;
   .login_box {
     width: 400px;
     height: 300px;

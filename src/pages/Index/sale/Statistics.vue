@@ -104,6 +104,47 @@ export default {
         });
       }, 100);
     }
+  },
+  mounted(){
+     // console.log(this.value1);
+      let data = JSON.stringify(
+        this.value1.map(v => moment(v).format("YYYY-MM-DD hh:mm:ss"))
+      );
+
+      var mycharts = echarts.init(document.getElementById("mycharts"));
+      mycharts.showLoading();
+      setTimeout(() => {
+        API_ordertotal(data).then(res => {
+          // console.log(res.data.data);
+          var data = res.data.data.map(v =>
+            moment(v.orderTime).format("YYYY-MM-DD hh:mm:ss")
+          );
+          // console.log(data);
+
+          // console.log(data);
+          var orderAmount = res.data.data.map(v => v.orderAmount);
+          // console.log(orderAmount);
+
+          let option = {
+            xAxis: {
+              type: "category",
+              data: data
+            },
+            yAxis: {
+              type: "value"
+            },
+            series: [
+              {
+                data: orderAmount,
+                type: "line"
+              }
+            ]
+          };
+          mycharts.setOption(option);
+
+          mycharts.hideLoading();
+        });
+      }, 100);
   }
 };
 </script>
